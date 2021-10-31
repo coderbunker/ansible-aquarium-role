@@ -42,15 +42,6 @@
   become: yes
   become_user: "{{ utilisateur_unix }}"
 
-- name: "Télécharger et décompresser les fichiers du projet Docker Composer de Jitsi Meet"
-  unarchive: 
-    src: "https://github.com/jitsi/docker-jitsi-meet/archive/refs/tags/{{ jitsi_version }}.tar.gz"
-    dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi"
-    extra_opts: [--strip-components=1]
-    remote_src: yes
-  become: yes
-  become_user: "{{ utilisateur_unix }}"
-
 - name: "Copier tous les fichiers de config. de l'Aquarium et de Jitsi Meet"
   template:
     src: "{{ item.src }}"

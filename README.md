@@ -48,7 +48,7 @@ Example Playbook
         state: present
       become: yes
   roles:
-    - aquarium
+    - ansible-aquarium-role
 ```
 
 License
