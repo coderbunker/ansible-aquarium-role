@@ -55,7 +55,7 @@
     - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-jitsi.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-ssl.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose-ssl.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
-    - { src: "env.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-jitsi-ssl.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/.jitsi-ssl.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "gen-passwords.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/gen-passwords.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
