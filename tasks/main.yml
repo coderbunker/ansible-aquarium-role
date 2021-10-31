@@ -1,0 +1,160 @@
+---
+# tasks file for aquarium
+
+# À FAIRE : désactiver les conteneurs si nécessaire
+
+- name: "Configurer le parefeu (ufw)"
+  include: configurer_parefeu.yml
+
+- name: "Ajouter l'utilisateur Unix qui exécutera docker/docker-compose"
+  user:
+    name: "{{ utilisateur_unix }}"
+    groups: docker
+    append: yes
+    generate_ssh_key: yes
+    shell: /bin/bash
+  register: utilisateur_unix_cree
+  become: yes
+
+- name: "Ajouter github.com aux known_hosts de l'utilisateur unix"
+  known_hosts:
+    name: github.com
+    key: github.com,140.82.112.4 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+    path: "/home/{{ utilisateur_unix }}/.ssh/known_hosts"
+    state: present
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+  
+- name: "Cloner le dépôt git de l'Aquarium"
+  git:
+    repo: "{{ depot_git_distant }}"
+    dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}"
+    version: "{{ depot_git_version }}"
+    force: yes
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Ajouter les répertoires de configuration nécessaires à l'Aquarium et Jitsi Meet" 
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop: "{{ repertoires_config }}"
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Télécharger et décompresser les fichiers du projet Docker Composer de Jitsi Meet"
+  unarchive: 
+    src: "https://github.com/jitsi/docker-jitsi-meet/archive/refs/tags/{{ jitsi_version }}.tar.gz"
+    dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi"
+    extra_opts: [--strip-components=1]
+    remote_src: yes
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Copier tous les fichiers de config. de l'Aquarium et de Jitsi Meet"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ utilisateur_unix }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: "Dockerfile.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "init_db.sql.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql/init_db.sql", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "docker-compose-jitsi.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "docker-compose-ssl.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose-ssl.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "env.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "env-jitsi-ssl.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/.jitsi-ssl.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "gen-passwords.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/gen-passwords.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
+    - { src: "aquarium.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/aquarium.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "init-letsencrypt.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/init-letsencrypt.sh", owner: "root", mode: "0755" }
+    - { src: "opcache.ini.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/opcache.ini", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "dockerignore.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.dockerignore", owner: "{{ utilisateur_unix }}", mode: "0644" }
+  become: yes
+
+#- name: "Générer des mots de passes fort pour Jitsi Meet"
+#  command: ./gen-passwords.sh
+#  args:
+#    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi
+#  become: yes
+#  become_user: "{{ utilisateur_unix }}"
+#  when: not passwords.changed
+
+- name: "Se connecter à Docker Hub"
+  docker_login:
+    username: "{{ docker_hub_nom }}"
+    password: "{{ docker_hub_mdp }}"
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Déterminer si le certificat SSL de l'Aquarium existe déjà"
+  stat:
+    path: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/certbot/conf/live/{{ aquarium_domaine }}/fullchain.pem"
+  register: aquassl
+  become: yes
+ 
+- name: "Générer le certificat SSL de l'Aquarium si nécessaire"
+  command: ./init-letsencrypt.sh
+  args:
+    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+  when: not aquassl.stat.exists
+  become: yes
+
+- name: "Déterminer si le certificat SSL de Jitsi Meet existe déjà"
+  stat:
+    path: "/home/{{ utilisateur_unix }}/.jitsi-meet-cfg/web/acme-certs/{{ jitsi_domaine }}/fullchain.pem"
+  register: jitsissl
+  become: yes
+
+- name: "Générer le certificat SSL de Jitsi Meet si nécessaire"
+  block:
+    - name: "Lancer les services de Jitsi Meet avec les ports http et https standards"
+      command: docker-compose --env-file=jitsi/.jitsi-ssl.env -f jitsi/docker-compose-ssl.yml up -d
+      args:
+        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+      become_user: "{{ utilisateur_unix }}"
+    - name: "Attendre 30 sec. pour laisser le temps à acme.sh de générer le certificat"
+      wait_for:
+        timeout: 30
+    - name: "Désactiver tous les services de Jitsi Meet"
+      command: docker-compose --env-file=jitsi/.jitsi-ssl.env -f jitsi/docker-compose-ssl.yml down --remove-orphans
+      args:
+        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+      become_user: "{{ utilisateur_unix }}"
+  when: not jitsissl.stat.exists
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "(Re)démarrer tous les services via docker-compose"
+  command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml up -d
+  args:
+    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Installer les dép. php/nodejs de l'Aquarium, générer une clé avec artisan, activer le cache, etc."
+  shell: 
+    cmd: "{{ item }}"
+  args: 
+    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+    executable: /bin/bash
+  loop:
+    - docker-compose exec -T app composer install --optimize-autoloader --no-dev
+    - docker-compose exec -T app npm install
+    - docker-compose exec -T app npm run production
+    - docker-compose exec -T app npm prune --production
+    - docker-compose exec -T app php artisan key:generate
+    - docker-compose exec -T app php artisan storage:link
+    - docker-compose exec -T app php artisan config:cache
+    #- docker-compose exec -T app php artisan route:cache
+    - docker-compose exec -T app php artisan view:cache
+  become: yes
+  become_user: "{{ utilisateur_unix }}"
+
+- name: "Se déconnecter de Docker Hub"
+  docker_login:
+    state: absent
+  become: yes
+  become_user: "{{ utilisateur_unix }}"

@@ -1,0 +1,673 @@
+-- phpMyAdmin SQL Dump
+-- version 4.9.2
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+-- Generation Time: Sep 21, 2021 at 02:04 PM
+-- Server version: 10.4.10-MariaDB
+-- PHP Version: 7.3.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `aquarium`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_log`
+--
+
+DROP TABLE IF EXISTS `activity_log`;
+CREATE TABLE IF NOT EXISTS `activity_log` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `log_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `causer_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causer_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `properties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`properties`)),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subject` (`subject_type`,`subject_id`),
+  KEY `causer` (`causer_type`,`causer_id`),
+  KEY `activity_log_log_name_index` (`log_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4721 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `activity_log`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `clients`
+--
+
+DROP TABLE IF EXISTS `clients`;
+CREATE TABLE IF NOT EXISTS `clients` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `alias` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `conferenceEnabled` tinyint(1) NOT NULL DEFAULT 1,
+  `livestreamEnabled` tinyint(1) NOT NULL DEFAULT 1,
+  `stripeId` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `limit` int(11) NOT NULL DEFAULT 10,
+  `price` double(8,2) DEFAULT NULL,
+  `reduction` double(8,2) DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `background` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contactName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contactInfo` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `isMonetize` tinyint(1) NOT NULL DEFAULT 1,
+  `endingAt` datetime DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `clients`
+--
+
+INSERT INTO `clients` (`id`, `name`, `alias`, `conferenceEnabled`, `livestreamEnabled`, `stripeId`, `limit`, `price`, `reduction`, `notes`, `logo`, `background`, `contactName`, `contactInfo`, `isMonetize`, `endingAt`, `isActive`, `created_at`, `updated_at`) VALUES
+(1,'Mon entreprise','mon-entreprise',1,1,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,1,'2021-09-22 11:37:57','2021-09-22 11:37:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_conference`
+--
+
+DROP TABLE IF EXISTS `client_conference`;
+CREATE TABLE IF NOT EXISTS `client_conference` (
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `conferenceID` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`clientId`,`conferenceID`),
+  KEY `client_conference_conferenceid_foreign` (`conferenceID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `client_conference`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_instance`
+--
+
+DROP TABLE IF EXISTS `client_instance`;
+CREATE TABLE IF NOT EXISTS `client_instance` (
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `instanceId` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`clientId`,`instanceId`),
+  KEY `client_instance_instanceid_foreign` (`instanceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `client_instance`
+--
+INSERT INTO `client_instance` (`clientId`, `instanceId`) VALUES
+(1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_livestream`
+--
+
+DROP TABLE IF EXISTS `client_livestream`;
+CREATE TABLE IF NOT EXISTS `client_livestream` (
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `livestreamId` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`clientId`,`livestreamId`),
+  KEY `client_livestream_livestreamid_foreign` (`livestreamId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `client_livestream`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_manager`
+--
+
+DROP TABLE IF EXISTS `client_manager`;
+CREATE TABLE IF NOT EXISTS `client_manager` (
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `userId` bigint(20) UNSIGNED NOT NULL,
+  `isMain` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`clientId`,`userId`),
+  KEY `client_manager_userid_foreign` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `client_manager`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_user`
+--
+
+DROP TABLE IF EXISTS `client_user`;
+CREATE TABLE IF NOT EXISTS `client_user` (
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `userId` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`clientId`,`userId`),
+  KEY `client_user_userid_foreign` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `client_user`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `conferences`
+--
+
+DROP TABLE IF EXISTS `conferences`;
+CREATE TABLE IF NOT EXISTS `conferences` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `roomName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `startAt` datetime NOT NULL,
+  `endAt` datetime NOT NULL,
+  `timezone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publicEventId` bigint(20) UNSIGNED DEFAULT NULL,
+  `isEnglish` tinyint(1) NOT NULL DEFAULT 0,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `conferences_publiceventid_foreign` (`publicEventId`)
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `conferences`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `conference_user`
+--
+
+DROP TABLE IF EXISTS `conference_user`;
+CREATE TABLE IF NOT EXISTS `conference_user` (
+  `conferenceId` int(10) UNSIGNED NOT NULL,
+  `userId` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`conferenceId`,`userId`),
+  KEY `conference_user_userid_foreign` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `conference_user`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `failed_jobs`
+--
+
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE IF NOT EXISTS `failed_jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `free_trials`
+--
+
+DROP TABLE IF EXISTS `free_trials`;
+CREATE TABLE IF NOT EXISTS `free_trials` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `length_in_days` int(11) NOT NULL DEFAULT 30,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `free_trials_user_id_foreign` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `free_trials`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `instances`
+--
+
+DROP TABLE IF EXISTS `instances`;
+CREATE TABLE IF NOT EXISTS `instances` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'jitsi',
+  `domain` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `statKey` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `instances`
+--
+
+INSERT INTO `instances` (`id`, `name`, `type`, `domain`, `key`, `statKey`, `created_at`, `updated_at`) VALUES
+(1, 'Aquarium', 'jitsi', '{{ jitsi_domaine }}:{{ port_https }}', '{{ jitsi_jwt_appli_secret }}', '', '2021-01-28 16:33:20', '2021-01-28 16:33:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `keys`
+--
+
+DROP TABLE IF EXISTS `keys`;
+CREATE TABLE IF NOT EXISTS `keys` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`json`)),
+  `used` tinyint(1) NOT NULL DEFAULT 0,
+  `userId` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=160 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `keys`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `livestreams`
+--
+
+DROP TABLE IF EXISTS `livestreams`;
+CREATE TABLE IF NOT EXISTS `livestreams` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `streamType` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'nginx-rtmp',
+  `streamId` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rtmpId` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rtmpKey` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `startAt` datetime NOT NULL,
+  `endAt` datetime NOT NULL,
+  `timezone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publicEventId` bigint(20) UNSIGNED DEFAULT NULL,
+  `isEnglish` tinyint(1) NOT NULL DEFAULT 0,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `livestreams_publiceventid_foreign` (`publicEventId`)
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `livestreams`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `livestream_user`
+--
+
+DROP TABLE IF EXISTS `livestream_user`;
+CREATE TABLE IF NOT EXISTS `livestream_user` (
+  `livestreamId` int(10) UNSIGNED NOT NULL,
+  `userId` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`livestreamId`,`userId`),
+  KEY `livestream_user_userid_foreign` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `livestream_user`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `meeting_rooms`
+--
+
+DROP TABLE IF EXISTS `meeting_rooms`;
+CREATE TABLE IF NOT EXISTS `meeting_rooms` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `clientId` int(10) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `roomName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `meeting_rooms_clientid_foreign` (`clientId`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `meeting_rooms`
+--
+INSERT INTO `meeting_rooms` (`id`, `clientId`, `name`, `roomName`, `password`, `created_at`, `updated_at`) VALUES
+(1,1,'Salle A','bW9uLWVudHJlcHJpc2UtbWVldGluZy1yb29tLUEtMS0wMjY5NA',NULL,'2021-09-22 11:37:57','2021-09-22 11:37:57'),
+(2,1,'Salle B','bW9uLWVudHJlcHJpc2UtbWVldGluZy1yb29tLUItMS0xMzAxOQ',NULL,'2021-09-22 11:37:57','2021-09-22 11:37:57'),
+(3,1,'Salle C','bW9uLWVudHJlcHJpc2UtbWVldGluZy1yb29tLUMtMS02ODk2NA',NULL,'2021-09-22 11:37:57','2021-09-22 11:37:57'),
+(4,1,'Salle D','bW9uLWVudHJlcHJpc2UtbWVldGluZy1yb29tLUQtMS0yNTc3Mw',NULL,'2021-09-22 11:37:57','2021-09-22 11:37:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `migrations`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+DROP TABLE IF EXISTS `password_resets`;
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `public_conferences`
+--
+
+DROP TABLE IF EXISTS `public_conferences`;
+CREATE TABLE IF NOT EXISTS `public_conferences` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `roomName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `timezone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `public_conferences`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `public_events`
+--
+
+DROP TABLE IF EXISTS `public_events`;
+CREATE TABLE IF NOT EXISTS `public_events` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `alias` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subtitleFR` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subtitleEN` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pictureFR` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pictureEN` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `descriptionFR` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `descriptionEN` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` double(8,2) NOT NULL DEFAULT 0.00,
+  `currency` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'CAD',
+  `registrationOpen` tinyint(1) NOT NULL DEFAULT 1,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `public_events_alias_unique` (`alias`)
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `public_events`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `public_users`
+--
+
+DROP TABLE IF EXISTS `public_users`;
+CREATE TABLE IF NOT EXISTS `public_users` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `eventType` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `eventId` bigint(20) UNSIGNED NOT NULL,
+  `fullName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `transactionId` bigint(20) UNSIGNED NOT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `public_users_transactionid_foreign` (`transactionId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tokens`
+--
+
+DROP TABLE IF EXISTS `tokens`;
+CREATE TABLE IF NOT EXISTS `tokens` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`json`)),
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'conference',
+  `targetId` int(10) UNSIGNED NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `isUsed` tinyint(1) NOT NULL DEFAULT 0,
+  `usedDate` datetime DEFAULT NULL,
+  `lastSeenAt` datetime DEFAULT NULL,
+  `validFrom` datetime DEFAULT NULL,
+  `validTo` datetime DEFAULT NULL,
+  `sentBy` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=240 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tokens`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transactions`
+--
+
+DROP TABLE IF EXISTS `transactions`;
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `price` double(8,2) NOT NULL DEFAULT 0.00,
+  `currency` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'CAD',
+  `paid` double(8,2) NOT NULL DEFAULT 0.00,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripeId` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `chargerId` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `PaymentIntentId` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customerId` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `refunded` tinyint(1) NOT NULL DEFAULT 0,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `adminLevel` int(11) DEFAULT NULL,
+  `profileImage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lastLoginAt` datetime DEFAULT NULL,
+  `lastLoginIP` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `google_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `adminLevel`, `profileImage`, `remember_token`, `lastLoginAt`, `lastLoginIP`, `created_at`, `updated_at`, `google_id`) VALUES
+(1, '{{ aquarium_admin_nom }}', '{{ aquarium_admin_courriel }}', NULL, '{{ aquarium_admin_mdp }}', 1, '', '', '2021-08-25 11:57:52', '::1', '2020-12-21 17:19:39', '2021-08-25 15:57:52', '');
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `client_conference`
+--
+ALTER TABLE `client_conference`
+  ADD CONSTRAINT `client_conference_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
+  ADD CONSTRAINT `client_conference_conferenceid_foreign` FOREIGN KEY (`conferenceID`) REFERENCES `conferences` (`id`);
+
+--
+-- Constraints for table `client_instance`
+--
+ALTER TABLE `client_instance`
+  ADD CONSTRAINT `client_instance_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
+  ADD CONSTRAINT `client_instance_instanceid_foreign` FOREIGN KEY (`instanceId`) REFERENCES `instances` (`id`);
+
+--
+-- Constraints for table `client_livestream`
+--
+ALTER TABLE `client_livestream`
+  ADD CONSTRAINT `client_livestream_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
+  ADD CONSTRAINT `client_livestream_livestreamid_foreign` FOREIGN KEY (`livestreamId`) REFERENCES `livestreams` (`id`);
+
+--
+-- Constraints for table `client_manager`
+--
+ALTER TABLE `client_manager`
+  ADD CONSTRAINT `client_manager_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
+  ADD CONSTRAINT `client_manager_userid_foreign` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `client_user`
+--
+ALTER TABLE `client_user`
+  ADD CONSTRAINT `client_user_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
+  ADD CONSTRAINT `client_user_userid_foreign` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `conferences`
+--
+ALTER TABLE `conferences`
+  ADD CONSTRAINT `conferences_publiceventid_foreign` FOREIGN KEY (`publicEventId`) REFERENCES `public_events` (`id`);
+
+--
+-- Constraints for table `conference_user`
+--
+ALTER TABLE `conference_user`
+  ADD CONSTRAINT `conference_user_conferenceid_foreign` FOREIGN KEY (`conferenceId`) REFERENCES `conferences` (`id`),
+  ADD CONSTRAINT `conference_user_userid_foreign` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `livestreams`
+--
+ALTER TABLE `livestreams`
+  ADD CONSTRAINT `livestreams_publiceventid_foreign` FOREIGN KEY (`publicEventId`) REFERENCES `public_events` (`id`);
+
+--
+-- Constraints for table `livestream_user`
+--
+ALTER TABLE `livestream_user`
+  ADD CONSTRAINT `livestream_user_livestreamid_foreign` FOREIGN KEY (`livestreamId`) REFERENCES `livestreams` (`id`),
+  ADD CONSTRAINT `livestream_user_userid_foreign` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `meeting_rooms`
+--
+ALTER TABLE `meeting_rooms`
+  ADD CONSTRAINT `meeting_rooms_clientid_foreign` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`);
+
+--
+-- Constraints for table `public_users`
+--
+ALTER TABLE `public_users`
+  ADD CONSTRAINT `public_users_transactionid_foreign` FOREIGN KEY (`transactionId`) REFERENCES `transactions` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
