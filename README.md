@@ -34,7 +34,7 @@ Example Playbook
   hosts: 
     - all
   vars:
-    # Supplanter ici les variables du role 'aquarium' au besoin
+    # Supplanter ici les variables du role 'ansible-aquarium-role' au besoin
     utilisateur_unix: "jitsi442"
     fuseau_horaire: "UTC-5"
     aquarium_domaine: "unvraidomaine.org"
