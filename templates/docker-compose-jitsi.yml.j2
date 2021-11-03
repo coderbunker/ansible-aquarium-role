@@ -11,6 +11,7 @@ services:
         volumes:
             - ${CONFIG}/web:/config:Z
             - ${CONFIG}/transcripts:/usr/share/jitsi-meet/transcripts:Z
+            - ./public/images/logo/logo_aquarium.svg:/usr/share/jitsi-meet/images/watermark.svg
         environment:
             - ENABLE_COLIBRI_WEBSOCKET
             - ENABLE_FLOC
