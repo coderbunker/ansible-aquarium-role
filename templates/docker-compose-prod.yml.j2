@@ -2,13 +2,13 @@ version: "3"
 
 services:
   app:
-    #build:
-    #  args:
-    #    user: {{ utilisateur_unix }}
-    #    uid: {{ utilisateur_unix_cree.uid }}
-    #  context: ./
-    #  dockerfile: Dockerfile
-    image: whynotblue/aquarium:latest-staging
+    build:
+      args:
+        user: {{ utilisateur_unix }}
+        uid: {{ utilisateur_unix_cree.uid }}
+      context: ./
+      dockerfile: Dockerfile
+    image: aquarium:latest-local
     container_name: aquarium-app
     restart: unless-stopped
     working_dir: {{ aquarium_racine }}
@@ -33,6 +33,7 @@ services:
     volumes:
       - ./docker-compose/mysql:/docker-entrypoint-initdb.d
       - ./docker-compose/mysql-data:/var/lib/mysql
+      - ./docker-compose/mysql-conf.d:/etc/mysql/conf.d
     networks:
         meet.jitsi:
 

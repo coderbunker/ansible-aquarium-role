@@ -29,6 +29,12 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
   echo
 fi
 
+echo "### Stopping and remove containers ..."
+docker stop aquarium-app
+docker stop aquarium-nginx
+docker rm aquarium-app
+docker rm aquarium-nginx
+
 echo "### Creating dummy certificate for $domains ..."
 path="/etc/letsencrypt/live/$domains"
 mkdir -p "$data_path/conf/live/$domains"

@@ -24,7 +24,11 @@
     state: present
   become: yes
   become_user: "{{ utilisateur_unix }}"
-  
+
+# Ajouter la nouvelle clé SSH publique de utilisateur_unix à Github.com en ligne de commande.
+# Il y a des exemples ici : https://unix.stackexchange.com/questions/136894/command-line-method-or-programmatically-add-ssh-key-to-github-com-user-account
+# Pas prioritaire car le dépôt sera bientôt public.
+
 - name: "Cloner le dépôt git de l'Aquarium"
   git:
     repo: "{{ depot_git_distant }}"
@@ -52,6 +56,7 @@
   loop:
     - { src: "Dockerfile.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "init_db.sql.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql/init_db.sql", owner: "{{ utilisateur_unix }}", mode: "0644" }
+    - { src: "custom.cnf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql-conf.d/custom.cnf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-jitsi.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-ssl.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose-ssl.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
@@ -59,19 +64,12 @@
     - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-jitsi-ssl.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/.jitsi-ssl.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "gen-passwords.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/gen-passwords.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
+    - { src: "sauv-db.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/sauv-db.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
     - { src: "aquarium.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/aquarium.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "init-letsencrypt.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/init-letsencrypt.sh", owner: "root", mode: "0755" }
     - { src: "opcache.ini.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/opcache.ini", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "dockerignore.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.dockerignore", owner: "{{ utilisateur_unix }}", mode: "0644" }
   become: yes
-
-#- name: "Générer des mots de passes fort pour Jitsi Meet"
-#  command: ./gen-passwords.sh
-#  args:
-#    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi
-#  become: yes
-#  become_user: "{{ utilisateur_unix }}"
-#  when: not passwords.changed
 
 - name: "Se connecter à Docker Hub"
   docker_login:
@@ -80,18 +78,14 @@
   become: yes
   become_user: "{{ utilisateur_unix }}"
 
-- name: "Déterminer si le certificat SSL de l'Aquarium existe déjà"
-  stat:
-    path: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/certbot/conf/live/{{ aquarium_domaine }}/fullchain.pem"
-  register: aquassl
-  become: yes
- 
-- name: "Générer le certificat SSL de l'Aquarium si nécessaire"
-  command: ./init-letsencrypt.sh
+- name: "Désactiver tous les services via docker-compose"
+  command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml down --remove-orphans
   args:
     chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-  when: not aquassl.stat.exists
   become: yes
+  become_user: "{{ utilisateur_unix }}"
+  ignore_errors: yes
+
 
 - name: "Déterminer si le certificat SSL de Jitsi Meet existe déjà"
   stat:
@@ -118,7 +112,28 @@
   become: yes
   become_user: "{{ utilisateur_unix }}"
 
-- name: "(Re)démarrer tous les services via docker-compose"
+- name: "Déterminer si le certificat SSL de l'Aquarium existe déjà"
+  stat:
+    path: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/certbot/conf/live/{{ aquarium_domaine }}/fullchain.pem"
+  register: aquassl
+  become: yes
+ 
+- name: "Générer le certificat SSL de l'Aquarium si nécessaire"
+  block:
+    - name: "Lancer les services de L'Aquarium pour s'assurer que l'image app est bien construite"
+      command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml up -d --build
+      args:
+        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+      become_user: "{{ utilisateur_unix }}"
+    - name: "Exécuter le script qui génère le certificat via certbot"
+      command: ./init-letsencrypt.sh
+      args:
+        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+      become_user: "{{ utilisateur_unix }}"
+  when: not aquassl.stat.exists
+  become: yes
+
+- name: "(Re)démarrer tous les services de L'Aquarium + Jitsi Meet via docker-compose"
   command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml up -d
   args:
     chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
@@ -149,3 +164,12 @@
     state: absent
   become: yes
   become_user: "{{ utilisateur_unix }}"
+
+- name: "Programmer la sauv. auto. de la BD"
+  cron:
+    name: "Sauvegarde BD"
+    user: "{{ utilisateur_unix }}"
+    minute: '0'
+    hour: '3'
+    job: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/sauv-db.sh"
+  become: yes
