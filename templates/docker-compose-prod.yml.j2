@@ -65,6 +65,7 @@ services:
   redis:
     image: redis:latest
     container_name: aquarium-redis
+    restart: unless-stopped
     volumes:
       - ./docker-compose/redis-data:/data
     networks:
