@@ -6,6 +6,9 @@
 - name: "Configurer le parefeu (ufw)"
   include: configurer_parefeu.yml
 
+- name: "Configurer le serveur mandataire (nginx)"
+  include: configurer_mandataire.yml
+
 - name: "Ajouter l'utilisateur Unix qui exécutera docker/docker-compose"
   user:
     name: "{{ utilisateur_unix }}"
@@ -59,11 +62,8 @@
     - { src: "custom.cnf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql-conf.d/custom.cnf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-jitsi.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
-    - { src: "docker-compose-ssl.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose-ssl.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
-    - { src: "env-jitsi-ssl.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/.jitsi-ssl.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
-    - { src: "gen-passwords.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/gen-passwords.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
     - { src: "sauv-db.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/sauv-db.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
     - { src: "aquarium.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/aquarium.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "init-letsencrypt.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/init-letsencrypt.sh", owner: "root", mode: "0755" }
@@ -78,60 +78,13 @@
   become: yes
   become_user: "{{ utilisateur_unix }}"
 
-- name: "Désactiver tous les services via docker-compose"
-  command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml down --remove-orphans
-  args:
-    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-  become: yes
-  become_user: "{{ utilisateur_unix }}"
-  ignore_errors: yes
-
-
-- name: "Déterminer si le certificat SSL de Jitsi Meet existe déjà"
-  stat:
-    path: "/home/{{ utilisateur_unix }}/.jitsi-meet-cfg/web/acme-certs/{{ jitsi_domaine }}/fullchain.pem"
-  register: jitsissl
-  become: yes
-
-- name: "Générer le certificat SSL de Jitsi Meet si nécessaire"
-  block:
-    - name: "Lancer les services de Jitsi Meet avec les ports http et https standards"
-      command: docker-compose --env-file=jitsi/.jitsi-ssl.env -f jitsi/docker-compose-ssl.yml up -d
-      args:
-        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-      become_user: "{{ utilisateur_unix }}"
-    - name: "Attendre 30 sec. pour laisser le temps à acme.sh de générer le certificat"
-      wait_for:
-        timeout: 30
-    - name: "Désactiver tous les services de Jitsi Meet"
-      command: docker-compose --env-file=jitsi/.jitsi-ssl.env -f jitsi/docker-compose-ssl.yml down --remove-orphans
-      args:
-        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-      become_user: "{{ utilisateur_unix }}"
-  when: not jitsissl.stat.exists
-  become: yes
-  become_user: "{{ utilisateur_unix }}"
-
-- name: "Déterminer si le certificat SSL de l'Aquarium existe déjà"
-  stat:
-    path: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/certbot/conf/live/{{ aquarium_domaine }}/fullchain.pem"
-  register: aquassl
-  become: yes
- 
-- name: "Générer le certificat SSL de l'Aquarium si nécessaire"
-  block:
-    - name: "Lancer les services de L'Aquarium pour s'assurer que l'image app est bien construite"
-      command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml up -d --build
-      args:
-        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-      become_user: "{{ utilisateur_unix }}"
-    - name: "Exécuter le script qui génère le certificat via certbot"
-      command: ./init-letsencrypt.sh
-      args:
-        chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
-      become_user: "{{ utilisateur_unix }}"
-  when: not aquassl.stat.exists
-  become: yes
+#- name: "Désactiver tous les services via docker-compose"
+#  command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml down --remove-orphans
+#  args:
+#    chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
+#  become: yes
+#  become_user: "{{ utilisateur_unix }}"
+#  ignore_errors: yes
 
 - name: "(Re)démarrer tous les services de L'Aquarium + Jitsi Meet via docker-compose"
   command: docker-compose --env-file=.prod.env -f docker-compose-prod.yml -f jitsi/docker-compose.yml up -d

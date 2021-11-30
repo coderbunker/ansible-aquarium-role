@@ -1,0 +1,67 @@
+---
+
+- name: "Determiner si acme.sh est présent"
+  stat:
+    path: "~/.acme.sh/acme.sh"
+  register: acme_sh_present
+  become: yes
+
+- name: "Cloner le dépôt git de acme.sh"
+  git:
+    repo: "https://github.com/acmesh-official/acme.sh.git"
+    dest: "~/.acme.sh"
+    force: yes
+  become: yes
+  when: not acme_sh_present.stat.exists
+
+- name: "Installer acme.sh"
+  shell: "./acme.sh --install -m  {{ letsencrypt_courriel }}"
+  args:
+    chdir: ~/.acme.sh
+    executable: /bin/bash
+  become: yes
+  when: not acme_sh_present.stat.exists
+
+- name: "Copier tous les fichiers de config. du serveur mandataire (nginx)"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: "jitsi-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/jitsi.conf", owner: "root", mode: "0644" }
+    - { src: "aquarium-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/aquarium.conf", owner: "root", mode: "0644" }
+    - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/redirect.conf", owner: "root", mode: "0644" }
+  become: yes
+
+- name: "Activer les hotes virtuels pour nginx"
+  file:
+    src: "/etc/nginx/sites-available/{{ item.src }}"
+    dest: "/etc/nginx/sites-enabled/{{ item.dest }}"
+    state: link
+  loop:
+    - { src: "jitsi.conf", dest: "jitsi.conf" }
+    - { src: "aquarium.conf", dest: "aquarium.conf" }
+    - { src: "redirect.conf", dest: "redirect.conf" }
+  become: yes
+
+- name: "(Re)générer les certificats Let's Encrypt avec acme.sh"
+  shell: "./acme.sh --issue -d {{ item }} --nginx --server letsencrypt"
+  args:
+    chdir: ~/.acme.sh
+    executable: /bin/bash
+  loop:
+    - "{{ jitsi_domaine }}"
+    - "{{ aquarium_domaine }}"
+  become: yes
+  ignore_errors: yes
+
+- name: "Installer les certificats Let's Encrypt avec acme.sh"
+  shell: "./acme.sh --install-cert -d {{ item }} --key-file /etc/ssl/private/{{ item }}.key.pem --fullchain-file /etc/ssl/certs/{{ item }}.fullchain.cer.pem --reloadcmd 'systemctl restart nginx'"
+  args:
+    chdir: ~/.acme.sh
+    executable: /bin/bash
+  loop:
+    - "{{ jitsi_domaine }}"
+    - "{{ aquarium_domaine }}"
+  become: yes

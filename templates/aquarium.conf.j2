@@ -1,6 +1,6 @@
 server {
     listen 80;
-    listen 443 ssl http2;
+    #listen 443 ssl http2;
     server_name {{ aquarium_domaine }};
     index index.php index.html;
     error_log  /var/log/nginx/error.log;
@@ -8,29 +8,29 @@ server {
     root {{ aquarium_racine_web }};
     
     # Redirection vers la bonne adresse et https
-    if ($host != $server_name) {
-        return 301 https://$server_name$request_uri;
-    }
-    if ($scheme != 'https') {
-        return 301 https://$server_name$request_uri;
-    }
+    #if ($host != $server_name) {
+    #    return 301 https://$server_name$request_uri;
+    #}
+    #if ($scheme != 'https') {
+    #    return 301 https://$server_name$request_uri;
+    #}
 
     # Let's Encrypt (certbot)
-    ssl_certificate /etc/letsencrypt/live/{{ aquarium_domaine }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ aquarium_domaine }}/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
+    #ssl_certificate /etc/letsencrypt/live/{{ aquarium_domaine }}/fullchain.pem;
+    #ssl_certificate_key /etc/letsencrypt/live/{{ aquarium_domaine }}/privkey.pem;
+    #include /etc/letsencrypt/options-ssl-nginx.conf;
+    #ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    #location /.well-known/acme-challenge/ {
+    #    root /var/www/certbot;
+    #}
     
     # HSTS, CSP et autres mesures de securite
-    add_header Strict-Transport-Security "max-age=63072000";
-    add_header Content-Security-Policy "{{ aquarium_csp }}";
+    #add_header Strict-Transport-Security "max-age=63072000";
+    #add_header Content-Security-Policy "{{ aquarium_csp }}";
     #add_header X-Frame-Options "deny";
-    add_header X-XSS-Protection "1; mode=block";
-    add_header X-Content-Type-Options "nosniff";
-    add_header Referrer-Policy "same-origin";
+    #add_header X-XSS-Protection "1; mode=block";
+    #add_header X-Content-Type-Options "nosniff";
+    #add_header Referrer-Policy "same-origin";
     
     # Compression
     gzip on;

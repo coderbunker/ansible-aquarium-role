@@ -42,8 +42,8 @@ services:
     container_name: aquarium-nginx
     restart: unless-stopped
     ports:
-      - 80:80
-      - 443:443
+      - 8000:80
+    #  - 443:443
     volumes:
       - ./:/var/www/aquarium
       - ./docker-compose/nginx:/etc/nginx/conf.d/
@@ -53,14 +53,14 @@ services:
     networks:
         meet.jitsi:
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./docker-compose/certbot/conf:/etc/letsencrypt
-      - ./docker-compose/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    networks:
-        meet.jitsi:
+  #certbot:
+  #  image: certbot/certbot
+  #  volumes:
+  #    - ./docker-compose/certbot/conf:/etc/letsencrypt
+  #    - ./docker-compose/certbot/www:/var/www/certbot
+  #  entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  #  networks:
+  #      meet.jitsi:
 
   redis:
     image: redis:latest
