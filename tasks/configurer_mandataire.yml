@@ -32,6 +32,7 @@
     - { src: "jitsi-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/jitsi.conf", owner: "root", mode: "0644" }
     - { src: "aquarium-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/aquarium.conf", owner: "root", mode: "0644" }
     - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/redirect.conf", owner: "root", mode: "0644" }
+    - { src: "phpmyadmin-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/phpmyadmin.conf", owner: "root", mode: "0644" }
   become: yes
 
 - name: "Activer les hotes virtuels pour nginx"
@@ -43,6 +44,7 @@
     - { src: "jitsi.conf", dest: "jitsi.conf" }
     - { src: "aquarium.conf", dest: "aquarium.conf" }
     - { src: "redirect.conf", dest: "redirect.conf" }
+    - { src: "phpmyadmin.conf", dest: "phpmyadmin.conf" }
   become: yes
 
 - name: "(Re)générer les certificats Let's Encrypt avec acme.sh"
@@ -64,4 +66,14 @@
   loop:
     - "{{ jitsi_domaine }}"
     - "{{ aquarium_domaine }}"
+  become: yes
+
+- name: "Configurer l'acces a phpmyadmin"
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: "{{ utilisateur_unix }}"
+    password: "{{ aquarium_bd_adm_mdp }}"
+    owner: root
+    group: www-data
+    mode: 0640
   become: yes

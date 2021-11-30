@@ -37,6 +37,26 @@ services:
     networks:
         meet.jitsi:
 
+  db-adm:
+    depends_on:
+      - db
+    build:
+      context: ./
+      dockerfile: docker-compose/phpmyadmin/Dockerfile
+    container_name: aquarium-db-adm
+    restart: always
+    ports:
+      - '8001:443'
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_ABSOLUTE_URI: https://{{ aquarium_domaine }}:8441
+    volumes:
+      - ./docker-compose/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    networks:
+      - meet.jitsi
+
   nginx:
     image: nginx:alpine
     container_name: aquarium-nginx
