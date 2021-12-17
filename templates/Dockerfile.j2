@@ -8,24 +8,30 @@ ARG user
 ARG uid
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update 
+    && apt-get install -y \
     libzip-dev \
     git \
     libpng-dev \
     libfreetype6-dev \
-    libjpeg62-turbo-dev
+    libjpeg62-turbo-dev \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 
 # Install nodejs
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get install -y nodejs
-
-# Clear cache
-RUN apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y nodejs \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install and configure PHP extensions
-RUN docker-php-ext-configure opcache --enable-opcache && docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ && docker-php-ext-install -j$(nproc) pdo_mysql gd zip opcache
-COPY docker-compose/php/opcache.ini $PHP_INI_DIR/conf.d/ 
-COPY docker-compose/php/security.ini $PHP_INI_DIR/conf.d/
+RUN docker-php-ext-configure opcache --enable-opcache \
+    && docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) pdo_mysql gd zip opcache
+COPY docker-compose/php/opcache.ini $PHP_INI_DIR/conf.d/
 
 RUN pecl install -o -f redis \
     &&  rm -rf /tmp/pear \
