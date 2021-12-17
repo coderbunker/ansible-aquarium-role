@@ -11,18 +11,24 @@
         add_header X-Frame-Options              SAMEORIGIN;
         add_header X-Content-Type-Options       nosniff;
         add_header X-XSS-Protection             "1; mode=block";
-        add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+        #add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+        add_header Content-Security-Policy "{{ aquarium_csp }}";
+        
+        #location ^~ /.well-known/acme-challenge/ {
+        #    default_type "text/plain";
+        #    root         /var/www/letsencrypt;
+        #}
 
         ssl_certificate /etc/ssl/certs/{{ aquarium_domaine }}.fullchain.cer.pem;
         ssl_certificate_key /etc/ssl/private/{{ aquarium_domaine }}.key.pem;
 
         location / {
-            proxy_pass         http://aquarium;
+            proxy_pass         https://aquarium;
             proxy_redirect     off;
             proxy_set_header   Host                 $host;
             proxy_set_header   X-Real-IP            $remote_addr;
             proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
-            proxy_set_header   X-Forwarded-Host     $server_name;
+            #proxy_set_header   X-Forwarded-Host     $server_name;
             #proxy_set_header    X-Forwarded-Proto   $scheme;
             #proxy_set_header    X-Forwarded-Port    $server_port;
         }

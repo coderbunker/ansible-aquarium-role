@@ -1,0 +1,4 @@
+FROM nginx
+
+# Install self-signed certificate
+RUN apt-get update && apt-get install -y ssl-cert

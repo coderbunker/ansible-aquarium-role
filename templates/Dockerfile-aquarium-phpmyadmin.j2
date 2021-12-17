@@ -1,0 +1,8 @@
+FROM phpmyadmin
+
+# Install self-signed certificate
+RUN apt-get update && apt-get install -y ssl-cert
+
+# Activer mod_ssl et activer l'hote SSL
+RUN a2enmod ssl && a2ensite default-ssl.conf
+

@@ -14,13 +14,22 @@
   become: yes
   when: not acme_sh_present.stat.exists
 
-- name: "Installer acme.sh"
-  shell: "./acme.sh --install -m  {{ letsencrypt_courriel }}"
-  args:
-    chdir: ~/.acme.sh
-    executable: /bin/bash
+#- name: "Installer acme.sh"
+#  shell: "./acme.sh --install -m  {{ letsencrypt_courriel }}"
+#  args:
+#    chdir: ~/.acme.sh
+#    executable: /bin/bash
+#  become: yes
+#  when: not acme_sh_present.stat.exists
+
+- name: "Add Let's Encrypt web root dir"
+  file:
+    path: /var/www/letsencrypt
+    state: directory
+    owner: "root"
+    group: "www-data"
+    mode: "0755"
   become: yes
-  when: not acme_sh_present.stat.exists
 
 - name: "Copier tous les fichiers de config. du serveur mandataire (nginx)"
   template:
@@ -29,10 +38,20 @@
     owner: "{{ item.owner }}"
     mode: "{{ item.mode }}"
   loop:
+    - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/default", owner: "root", mode: "0644" }
     - { src: "jitsi-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/jitsi.conf", owner: "root", mode: "0644" }
     - { src: "aquarium-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/aquarium.conf", owner: "root", mode: "0644" }
-    - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/redirect.conf", owner: "root", mode: "0644" }
     - { src: "phpmyadmin-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/phpmyadmin.conf", owner: "root", mode: "0644" }
+  become: yes
+
+- name: "Configurer l'acces a phpmyadmin"
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: "{{ aquarium_bd_adm }}"
+    password: "{{ aquarium_bd_adm_mdp }}"
+    owner: root
+    group: www-data
+    mode: 0640
   become: yes
 
 - name: "Activer les hotes virtuels pour nginx"
@@ -41,14 +60,14 @@
     dest: "/etc/nginx/sites-enabled/{{ item.dest }}"
     state: link
   loop:
+    - { src: "default", dest: "default" }
     - { src: "jitsi.conf", dest: "jitsi.conf" }
     - { src: "aquarium.conf", dest: "aquarium.conf" }
-    - { src: "redirect.conf", dest: "redirect.conf" }
     - { src: "phpmyadmin.conf", dest: "phpmyadmin.conf" }
   become: yes
 
 - name: "(Re)générer les certificats Let's Encrypt avec acme.sh"
-  shell: "./acme.sh --issue -d {{ item }} --nginx --server letsencrypt"
+  shell: "./acme.sh --issue -d {{ item }} -w /var/www/letsencrypt --server letsencrypt"
   args:
     chdir: ~/.acme.sh
     executable: /bin/bash
@@ -66,14 +85,4 @@
   loop:
     - "{{ jitsi_domaine }}"
     - "{{ aquarium_domaine }}"
-  become: yes
-
-- name: "Configurer l'acces a phpmyadmin"
-  htpasswd:
-    path: /etc/nginx/.htpasswd
-    name: "{{ utilisateur_unix }}"
-    password: "{{ aquarium_bd_adm_mdp }}"
-    owner: root
-    group: www-data
-    mode: 0640
   become: yes

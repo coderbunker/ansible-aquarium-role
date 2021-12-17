@@ -51,6 +51,8 @@ GOOGLE_CLIENT_ID={{ aquarium_google_client_id }}
 GOOGLE_CLIENT_SECRET={{ aquarium_google_client_secret }}
 GOOGLE_REDIRECT={{ aquarium_google_redirect }}
 
+CRISP_CHAT_ON=true
+
 ################
 # AQUARIUM END #
 ################
@@ -113,8 +115,11 @@ PUBLIC_URL=https://{{ jitsi_domaine }}
 # Control whether the lobby feature should be enabled or not
 #ENABLE_LOBBY=1
 
+# Control whether the A/V moderation should be enabled or not
+#ENABLE_AV_MODERATION=1
+
 # Show a prejoin page before entering a conference
-#ENABLE_PREJOIN_PAGE=0
+ENABLE_PREJOIN_PAGE=0
 
 # Enable the welcome page
 ENABLE_WELCOME_PAGE=1
@@ -127,6 +132,9 @@ ENABLE_WELCOME_PAGE=1
 
 # Enable noisy mic detection
 ENABLE_NOISY_MIC_DETECTION=1
+
+# Enable breakout rooms
+ENABLE_BREAKOUT_ROOMS=1
 
 #
 # Let's Encrypt configuration
@@ -317,10 +325,6 @@ JVB_TCP_HARVESTER_DISABLED=true
 JVB_TCP_PORT=4443
 JVB_TCP_MAPPED_PORT=4443
 
-# A comma separated list of APIs to enable when the JVB is started [default: none]
-# See https://github.com/jitsi/jitsi-videobridge/blob/master/doc/rest.md for more information
-#JVB_ENABLE_APIS=rest,colibri
-
 # XMPP user for Jicofo client connections.
 # NOTE: this option doesn't currently work due to a bug
 JICOFO_AUTH_USER=focus
@@ -420,6 +424,13 @@ JIBRI_STRIP_DOMAIN_JID=muc
 # Directory for logs inside Jibri container
 JIBRI_LOGS_DIR=/config/logs
 
+# Configure an external TURN server
+# TURN_CREDENTIALS=secret
+# TURN_HOST=turnserver.example.com
+# TURN_PORT=443
+# TURNS_HOST=turnserver.example.com
+# TURNS_PORT=443
+
 # Disable HTTPS: handle TLS connections outside of this setup
 #DISABLE_HTTPS=1
 
@@ -446,6 +457,23 @@ RESTART_POLICY=unless-stopped
 
 # Authenticate using external service or just focus external auth window if there is one already.
 # TOKEN_AUTH_URL=https://auth.meet.example.com/{room}
+
+# Sentry Error Tracking
+# Sentry Data Source Name (Endpoint for Sentry project)
+# Example: https://public:private@host:port/1
+#JVB_SENTRY_DSN=
+#JICOFO_SENTRY_DSN=
+#JIGASI_SENTRY_DSN=
+
+# Optional environment info to filter events
+#SENTRY_ENVIRONMENT=production
+
+# Optional release info to filter events
+#SENTRY_RELEASE=1.0.0
+
+# Optional properties for shutdown api
+#COLIBRI_REST_ENABLED=true
+#SHUTDOWN_REST_ENABLED=true
 
 #############
 # JITSI END #
