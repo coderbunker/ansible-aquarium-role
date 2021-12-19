@@ -73,7 +73,6 @@
     - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "docker-compose-jitsi.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/docker-compose.yml", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
-    #- { src: "env-prod.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "sauv-db.sh.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/sauv-db.sh", owner: "{{ utilisateur_unix }}", mode: "0744" }
     - { src: "aquarium.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/conf.d/aquarium.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "Dockerfile-aquarium-nginx.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0644" }
@@ -87,14 +86,6 @@
     - { src: "Dockerfile-aquarium-phpmyadmin.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/phpmyadmin/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "config.user.inc.php.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/phpmyadmin/config.user.inc.php", owner: "{{ utilisateur_unix }}", mode: "0644" }
   become: yes
-
-#- name: "Ajouter lien symbolique .prod.env -> .env"
-#  file:
-#    src: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.prod.env"
-#    dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.env"
-#    state: link
-#  become: yes
-#  become_user: "{{ utilisateur_unix }}"
 
 - name: "Se connecter à Docker Hub"
   docker_login:
