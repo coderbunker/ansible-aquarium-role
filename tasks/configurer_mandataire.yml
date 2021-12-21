@@ -14,13 +14,14 @@
   become: yes
   when: not acme_sh_present.stat.exists
 
-#- name: "Installer acme.sh"
-#  shell: "./acme.sh --install -m  {{ letsencrypt_courriel }}"
-#  args:
-#    chdir: ~/.acme.sh
-#    executable: /bin/bash
-#  become: yes
-#  when: not acme_sh_present.stat.exists
+- name: "Installer acme.sh"
+  shell: "./acme.sh --install -m  {{ letsencrypt_courriel }}"
+  args:
+    chdir: ~/.acme.sh
+    executable: /bin/bash
+  become: yes
+  when: not acme_sh_present.stat.exists
+  ignore_errors: yes
 
 - name: "Add Let's Encrypt web root dir"
   file:
@@ -28,7 +29,7 @@
     state: directory
     owner: "root"
     group: "www-data"
-    mode: "0755"
+    mode: "0750"
   become: yes
 
 - name: "Copier tous les fichiers de config. du serveur mandataire (nginx)"
@@ -38,10 +39,10 @@
     owner: "{{ item.owner }}"
     mode: "{{ item.mode }}"
   loop:
-    - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/default", owner: "root", mode: "0644" }
-    - { src: "jitsi-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/jitsi.conf", owner: "root", mode: "0644" }
-    - { src: "aquarium-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/aquarium.conf", owner: "root", mode: "0644" }
-    - { src: "phpmyadmin-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/phpmyadmin.conf", owner: "root", mode: "0644" }
+    - { src: "redirect-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/default", owner: "root", mode: "0640" }
+    - { src: "jitsi-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/jitsi.conf", owner: "root", mode: "0640" }
+    - { src: "aquarium-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/aquarium.conf", owner: "root", mode: "0640" }
+    - { src: "phpmyadmin-proxy-vhost.conf.j2", dest: "/etc/nginx/sites-available/phpmyadmin.conf", owner: "root", mode: "0640" }
   become: yes
 
 - name: "Configurer l'acces a phpmyadmin"
@@ -78,11 +79,17 @@
   ignore_errors: yes
 
 - name: "Installer les certificats Let's Encrypt avec acme.sh"
-  shell: "./acme.sh --install-cert -d {{ item }} --key-file /etc/ssl/private/{{ item }}.key.pem --fullchain-file /etc/ssl/certs/{{ item }}.fullchain.cer.pem --reloadcmd 'systemctl restart nginx'"
+  shell: "./acme.sh --install-cert -d {{ item }} --key-file /etc/ssl/private/{{ item }}.key.pem --fullchain-file /etc/ssl/certs/{{ item }}.fullchain.cer.pem"
   args:
     chdir: ~/.acme.sh
     executable: /bin/bash
   loop:
     - "{{ jitsi_domaine }}"
     - "{{ aquarium_domaine }}"
+  become: yes
+
+- name: "Redémarrer nginx"
+  service:
+    name: nginx
+    state: restarted
   become: yes

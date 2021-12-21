@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:1.20
 
 # Install self-signed certificate
 RUN apt-get update && apt-get install -y ssl-cert
