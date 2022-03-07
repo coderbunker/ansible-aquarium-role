@@ -4,7 +4,7 @@
 depot_git_distant: "git@github.com:Whynotblue/aquarium.git"
 depot_git_local: "aquarium"
 depot_git_version: "dev"
-jitsi_version: "stable-6726-1"
+jitsi_version: "stable-6865"
 utilisateur_unix: "jitsi943"
 repertoires_config: "['~/.aquarium', '~/{{ depot_git_local }}/docker-compose/mysql-data', '~/{{ depot_git_local }}/docker-compose/mysql-conf.d', '~/{{ depot_git_local }}/docker-compose/nginx/conf.d', '~/{{ depot_git_local }}/docker-compose/php', '~/{{ depot_git_local }}/docker-compose/phpmyadmin', '~/{{ depot_git_local }}/docker-compose/prosody', '~/{{ depot_git_local }}/docker-compose/prosody/config', '~/{{ depot_git_local }}/docker-compose/prosody/config/conf.d',  '~/{{ depot_git_local }}/jitsi', '~/.jitsi-meet-cfg/web', '~/.jitsi-meet-cfg/web/letsencrypt', '~/.jitsi-meet-cfg/transcripts', '~/.jitsi-meet-cfg/prosody', '~/.jitsi-meet-cfg/prosody/config', '~/.jitsi-meet-cfg/prosody/prosody-plugins-custom', '~/.jitsi-meet-cfg/jicofo', '~/.jitsi-meet-cfg/jvb', '~/.jitsi-meet-cfg/jigasi', '~/.jitsi-meet-cfg/jibri']"
 
