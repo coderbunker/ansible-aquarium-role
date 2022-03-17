@@ -13,12 +13,12 @@ services:
             - ${CONFIG}/web:/config:Z
             - ${CONFIG}/web/crontabs:/var/spool/cron/crontabs:Z
             - ${CONFIG}/transcripts:/usr/share/jitsi-meet/transcripts:Z
-            - ./public/jitsi_iframe/logo/logo_aquarium.svg:/usr/share/jitsi-meet/images/watermark.svg
-            - ./public/jitsi_iframe/js/interface_config.js:/config/interface_config.js
-            - ./public/jitsi_iframe/js/config.js:/config/config.js
-            - ./public/jitsi_iframe/html/title.html:/usr/share/jitsi-meet/title.html
-            - ./public/jitsi_iframe/html/index.html:/usr/share/jitsi-meet/index.html
-            - ./public/jitsi_iframe/css/all.css:/usr/share/jitsi-meet/css/all.css
+            - ./public/jitsi_iframe/logo/logo_aquarium.svg:/usr/share/jitsi-meet/images/watermark.svg:ro
+            - ./public/jitsi_iframe/js/interface_config.js:/config/interface_config.js:ro
+            - ./public/jitsi_iframe/js/config.js:/config/config.js:ro
+            - ./public/jitsi_iframe/html/title.html:/usr/share/jitsi-meet/title.html:ro
+            - ./public/jitsi_iframe/html/index.html:/usr/share/jitsi-meet/index.html:ro
+            - ./public/jitsi_iframe/css/all.css:/usr/share/jitsi-meet/css/all.css:ro
 #            - ./public/images/logo/logo_aquarium.svg:/usr/share/jitsi-meet/images/watermark.svg
         environment:
             - AMPLITUDE_ID
