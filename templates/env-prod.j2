@@ -56,6 +56,10 @@ GOOGLE_CAPTCHA_PRIVATE_KEY={{ aquarium_recaptcha_private_key }}
 
 CRISP_CHAT_ON=true
 
+APP_THEME={{ aquarium_app_theme }}
+
+DISABLE_DEEP_LINKING={{ aquarium_disable_deep_linking }}
+
 ################
 # AQUARIUM END #
 ################
@@ -300,7 +304,7 @@ XMPP_GUEST_DOMAIN=guest.{{ jitsi_domaine }}
 
 # Comma separated list of domains for cross domain policy or "true" to allow all
 # The PUBLIC_URL is always allowed
-#XMPP_CROSS_DOMAIN=true
+XMPP_CROSS_DOMAIN={{ aquarium_xmpp_cross_domain }}
 
 # Custom Prosody modules for XMPP_DOMAIN (comma separated)
 XMPP_MODULES=
