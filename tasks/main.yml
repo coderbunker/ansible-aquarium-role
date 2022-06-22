@@ -85,6 +85,7 @@
     - { src: "aquarium.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/conf.d/aquarium.conf", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "Dockerfile-aquarium-nginx.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/nginx/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "opcache.ini.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/opcache.ini", owner: "{{ utilisateur_unix }}", mode: "0640" }
+    - { src: "php.ini.production.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/php.ini", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "security.ini.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/security.ini", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "dockerignore.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.dockerignore", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "prosody.cfg.lua.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/prosody/rootfs/defaults/prosody.cfg.lua", owner: "{{ utilisateur_unix }}", mode: "0640" }
