@@ -83,6 +83,10 @@ modules_enabled = {
 		--"watchregistrations"; -- Alert admins of registrations
 		--"motd"; -- Send a message to users when they log in
 		--"legacyauth"; -- Legacy authentication. Only used by some old clients and bots.
+
+        -- Additional plugins
+                "muc_census";
+
         {{ if .Env.GLOBAL_MODULES }}
         "{{ join "\";\n\"" (splitList "," .Env.GLOBAL_MODULES) }}";
         {{ end }}
