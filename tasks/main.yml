@@ -53,13 +53,13 @@
 - name: "S'assurer que le sous-module Jitsi est à la bonne version"
   shell:
     cmd: "git checkout -f {{ jitsi_version }}"
-  args: 
+  args:
     chdir: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi"
     executable: /bin/bash
   become: yes
   become_user: "{{ utilisateur_unix }}"
 
-- name: "Ajouter les répertoires de configuration nécessaires à l'Aquarium et Jitsi Meet" 
+- name: "Ajouter les répertoires de configuration nécessaires à l'Aquarium et Jitsi Meet"
   file:
     path: "{{ item }}"
     state: directory
@@ -88,7 +88,7 @@
     - { src: "php.ini.production.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/php.ini", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "security.ini.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/php/security.ini", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "dockerignore.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/.dockerignore", owner: "{{ utilisateur_unix }}", mode: "0640" }
-    #- { src: "prosody.cfg.lua.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/prosody/rootfs/defaults/prosody.cfg.lua", owner: "{{ utilisateur_unix }}", mode: "0640" }
+    - { src: "prosody.cfg.lua.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/prosody/rootfs/defaults/prosody.cfg.lua", owner: "{{ utilisateur_unix }}", mode: "0640" }
     #- { src: "jitsi-meet.cfg.lua.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/prosody/rootfs/defaults/conf.d/jitsi-meet.cfg.lua", owner: "{{ utilisateur_unix }}", mode: "0640" }
     #- { src: "mod_muc_status.lua.j2", dest: "/home/{{ utilisateur_unix }}/.jitsi-meet-cfg/prosody/prosody-plugins-custom/mod_muc_status.lua", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "meet.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/web/rootfs/defaults/meet.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
@@ -119,9 +119,9 @@
   become_user: "{{ utilisateur_unix }}"
 
 - name: "Installer les dép. php/nodejs de l'Aquarium, générer une clé avec artisan, activer le cache, etc."
-  shell: 
+  shell:
     cmd: "{{ item }}"
-  args: 
+  args:
     chdir: /home/{{ utilisateur_unix }}/{{ depot_git_local }}
     executable: /bin/bash
   loop:
@@ -147,7 +147,7 @@
   cron:
     name: "Sauvegarde BD"
     user: "{{ utilisateur_unix }}"
-    minute: '0'
-    hour: '3'
+    minute: "0"
+    hour: "3"
     job: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/sauv-db.sh"
   become: yes
