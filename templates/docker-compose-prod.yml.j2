@@ -93,6 +93,9 @@ services:
       - '4005:4005'
     depends_on:
       - redis
+      - app
+      - nginx
+      - db-adm
     networks:
       - meet.jitsi
 
