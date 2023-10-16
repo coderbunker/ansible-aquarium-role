@@ -81,7 +81,7 @@ services:
     networks:
         meet.jitsi:
 
-    websockets:
+  websockets:
     image: aquarium:latest-local
     command: ['php', 'artisan', 'websockets:serve']
     container_name: websockets
