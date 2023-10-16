@@ -81,5 +81,20 @@ services:
     networks:
         meet.jitsi:
 
+    websockets:
+    image: aquarium:latest-local
+    command: ['php', 'artisan', 'websockets:serve']
+    container_name: websockets
+    restart: unless-stopped
+    working_dir: /var/www/aquarium
+    volumes:
+      - ./:/var/www/aquarium
+    ports:
+      - '4005:4005'
+    depends_on:
+      - redis
+    networks:
+      - meet.jitsi
+
 networks:
     meet.jitsi:
