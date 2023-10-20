@@ -89,8 +89,6 @@ services:
     working_dir: {{ aquarium_racine }}
     volumes:
       - ./:{{ aquarium_racine }}
--    ports:
--      - '4005:4005'
     depends_on:
       - redis
     networks:
