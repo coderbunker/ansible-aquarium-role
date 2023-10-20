@@ -86,16 +86,13 @@ services:
     command: ['php', 'artisan', 'websockets:serve']
     container_name: websockets
     restart: unless-stopped
-    working_dir: /var/www/aquarium
+    working_dir: {{ aquarium_racine }}
     volumes:
-      - ./:/var/www/aquarium
-    ports:
-      - '4005:4005'
+      - ./:{{ aquarium_racine }}
+-    ports:
+-      - '4005:4005'
     depends_on:
       - redis
-      - app
-      - nginx
-      - db-adm
     networks:
       - meet.jitsi
 
