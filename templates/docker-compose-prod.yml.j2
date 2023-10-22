@@ -87,10 +87,15 @@ services:
     container_name: websockets
     restart: unless-stopped
     working_dir: {{ aquarium_racine }}
+    ports:
+      - '6001:6001'
     volumes:
       - ./:{{ aquarium_racine }}
     depends_on:
+      - app
+      - nginx
       - redis
+      - db-adm
     networks:
       - meet.jitsi
 
