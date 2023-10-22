@@ -19,10 +19,10 @@ DB_USERNAME={{ aquarium_bd_u }}
 DB_PASSWORD={{ aquarium_bd_mdp }}
 
 BROADCAST_DRIVER=pusher
-CACHE_DRIVER=file
+CACHE_DRIVER=redis
 FILESYSTEM_DRIVER=local
-QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
+QUEUE_CONNECTION=redis
+SESSION_DRIVER=redis
 SESSION_LIFETIME=120
 
 PUSHER_APP_ID=aquarium-websockets-channel
