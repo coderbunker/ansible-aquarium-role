@@ -84,8 +84,8 @@ services:
   websockets:
     build:
       args:
-        user: ${UNIX_USERNAME}
-        uid: 1000
+        user: {{ utilisateur_unix }}
+        uid: {{ utilisateur_unix_cree.uid }}
       context: ./laravel-websockets
       dockerfile: Dockerfile
 #    image: websockets-aquarium
