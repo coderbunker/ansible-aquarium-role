@@ -76,6 +76,7 @@
     mode: "{{ item.mode }}"
   loop:
     - { src: "Dockerfile.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0640" }
+    - { src: "Dockerfile-ws.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/Dockerfile-ws", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "init_db.sql.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql/init_db.sql", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "custom.cnf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/mysql-conf.d/custom.cnf", owner: "{{ utilisateur_unix }}", mode: "0640" }
     - { src: "docker-compose-prod.yml.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose-prod.yml", owner: "{{ utilisateur_unix }}", mode: "0640" }
