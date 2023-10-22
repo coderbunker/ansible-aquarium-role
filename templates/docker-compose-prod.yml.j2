@@ -99,10 +99,7 @@ services:
     ports:
       - '6001:6001'
     depends_on:
-      - app
-      - nginx
       - redis
-      - db-adm
     networks:
       - meet.jitsi
 
