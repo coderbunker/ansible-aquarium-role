@@ -71,7 +71,8 @@ services:
       - ./docker-compose/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
         meet.jitsi:
-
+  
+  # Redis service Aquarium Stage
   redis:
     image: redis:6.2
     container_name: aquarium-redis
@@ -80,6 +81,100 @@ services:
       - ./docker-compose/redis-data:/data
     networks:
         meet.jitsi:
+
+  # Redis service (Auditorium Production)
+  redis_prod:
+    image: redis:latest
+    container_name: aquarium-redis-prod
+    restart: unless-stopped
+    ports:
+      - "6377:6379" 
+    volumes:
+      - ./docker-compose/redis-data-prod:/data
+    networks:
+      - meet.jitsi
+
+  # Redis service (Auditorium Staging)
+  redis_staging:
+    image: redis:latest
+    ports:
+      - "6378:6379"
+    container_name: aquarium-redis-staging
+    restart: unless-stopped
+    volumes:
+      - ./docker-compose/redis-data-staging:/data
+    networks:
+      - meet.jitsi
+
+  # Soketi service (Auditorium Production)
+  soketi:
+    image: quay.io/soketi/soketi:1.4-16-debian
+    container_name: soketi
+    ports:
+      - "6002:6001" # Expose Soketi on port 6001
+    environment:
+      SOKETI_DEFAULT_APP_ID: 'auditorium'
+      SOKETI_DEFAULT_APP_KEY: 'JCnPTDPhthda'
+      SOKETI_DEFAULT_APP_SECRET: 'tUzsryaGmdBqC'
+      SOKETI_DEBUG: "true"
+      SOKETI_SSL_CERT: /certs/fullchain.pem
+      SOKETI_SSL_KEY: /certs/privkey.pem
+      SOKETI_SERVER_SCHEME: https
+      SOKETI_METRICS_SERVER_PORT: 9601
+      SOKETI_SERVER_HEARTBEAT_INTERVAL: 3600
+      SOKETI_SERVER_HEARTBEAT_TIMEOUT: 3900
+      SOKETI_SERVER_MAX_IDLE_TIME: 5400
+      SOCKETI_SERVER_MAX_CLIENTS: 10000
+      SOCKETI_EVENT_LOOP: libuv
+      SOCKETI_WORKER_COUNT: 10
+      SOKETI_PRESENCE_MAX_MEMBERS: 5500
+    ulimits:
+      nofile:
+        soft: 10240
+        hard: 10240
+    command: "soketi -w 4"
+    depends_on:
+      - redis
+    restart: always
+    volumes:
+      - ./certs-production:/certs:ro
+    networks:
+      - meet.jitsi
+
+  # Soketi service (Auditorium Staging)
+  soketi_staging:
+    image: quay.io/soketi/soketi:1.4-16-debian
+    container_name: soketi_staging
+    depends_on:
+      - redis_staging
+    ports:
+      - "6003:6001" # Expose Soketi on port 6001
+    environment:
+      SOKETI_DEFAULT_APP_ID: 'auditorium'
+      SOKETI_DEFAULT_APP_KEY: 'JCnPTDPhthda'
+      SOKETI_DEFAULT_APP_SECRET: 'tUzsryaGmdBqC'
+      SOKETI_DEBUG: "true"
+      SOKETI_SSL_CERT: /certs/fullchain.pem
+      SOKETI_SSL_KEY: /certs/privkey.pem
+      SOKETI_SERVER_SCHEME: http
+      SOKETI_METRICS_SERVER_PORT: 9602
+      SOKETI_SERVER_HEARTBEAT_INTERVAL: 3600
+      SOKETI_SERVER_HEARTBEAT_TIMEOUT: 3900
+      SOKETI_SERVER_MAX_IDLE_TIME: 5400
+      SOCKETI_SERVER_MAX_CLIENTS: 10000
+      SOCKETI_EVENT_LOOP: libuv
+      SOCKETI_WORKER_COUNT: 10
+      SOKETI_PRESENCE_MAX_MEMBERS: 5500
+    ulimits:
+      nofile:
+        soft: 10240
+        hard: 10240
+    command: "soketi -w 4"
+    restart: always
+    volumes:
+      - ./certs-staging:/certs:ro
+    networks:
+      - meet.jitsi      
 
   websockets:
     build:
