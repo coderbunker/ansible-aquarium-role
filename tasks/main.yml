@@ -95,6 +95,8 @@
     - { src: "meet.conf.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/web/rootfs/defaults/meet.conf", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "Dockerfile-aquarium-phpmyadmin.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/phpmyadmin/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0644" }
     - { src: "config.user.inc.php.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/docker-compose/phpmyadmin/config.user.inc.php", owner: "{{ utilisateur_unix }}", mode: "0640" }
+    - { src: "Dockerfile-prosody.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/prosody/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0640" }
+    - { src: "Dockerfile-web.j2", dest: "/home/{{ utilisateur_unix }}/{{ depot_git_local }}/jitsi/web/Dockerfile", owner: "{{ utilisateur_unix }}", mode: "0640" }
   become: yes
 
 - name: "Se connecter à Docker Hub"
